@@ -4,105 +4,119 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>스키 셔틀 플래너 26/27</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
 <style>
 :root{
-  --bg:#EEF3F6; --surface:#FFFFFF; --ink:#14212B; --muted:#5D6D7A; --line:#D3DDE4;
-  --blue:#1E4F8F; --blue-soft:#DCE7F4; --sign:#F2B705; --sign-ink:#2E2300;
-  --off:#9FB4C7; --post:#C5CDD3; --warn:#A8431C; --warn-soft:#FBE9E1; --ok:#1F7A4D; --ok-soft:#DDF0E5;
-  --wkend:#B03A3A;
+  --bg:#FFFFFF; --surface:#F4F4F5; --surface-2:#EBEBED; --ink:#0A0A0A; --muted:#71717A; --faint:#A1A1AA; --line:#E4E4E7;
+  --hero:#0A0A0A; --hero-ink:#FFFFFF; --hero-muted:#A1A1AA;
+  --point:#F0652A; --point-soft:#FDE9DF; --point-ink:#FFFFFF;
+  --peak:#0A0A0A; --off:#A1A1AA; --post:#E4E4E7;
   color-scheme: light;
 }
 @media (prefers-color-scheme: dark){
   :root{
-    --bg:#0E161D; --surface:#16212B; --ink:#E6EDF2; --muted:#94A5B3; --line:#2A3946;
-    --blue:#86ADE3; --blue-soft:#1D3048; --sign:#F2C230; --sign-ink:#241B00;
-    --off:#4D6478; --post:#3A4650; --warn:#EE9670; --warn-soft:#3A2219; --ok:#68C794; --ok-soft:#173326;
-    --wkend:#F08A8A;
+    --bg:#000000; --surface:#141416; --surface-2:#1E1E21; --ink:#F4F4F5; --muted:#A1A1AA; --faint:#71717A; --line:#27272A;
+    --hero:#141416; --hero-ink:#FFFFFF; --hero-muted:#A1A1AA;
+    --point:#F26B30; --point-soft:#3A1E12; --point-ink:#FFFFFF;
+    --peak:#F4F4F5; --off:#71717A; --post:#3F3F46;
     color-scheme: dark;
   }
 }
 *{box-sizing:border-box}
-body{margin:0;background:var(--bg);color:var(--ink);font-family:"IBM Plex Sans KR",system-ui,sans-serif;line-height:1.5;-webkit-font-smoothing:antialiased}
-.wrap{max-width:760px;margin:0 auto;padding:20px 16px 48px}
-h1{font-size:22px;font-weight:700;margin:0;letter-spacing:-0.01em}
-.sub{color:var(--muted);font-size:13px;margin:4px 0 18px}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"Pretendard",-apple-system,system-ui,sans-serif;line-height:1.5;-webkit-font-smoothing:antialiased;letter-spacing:-0.01em}
+.wrap{max-width:720px;margin:0 auto;padding:28px 20px 56px}
 .num{font-variant-numeric:tabular-nums}
+.brand{font-size:13px;font-weight:700;color:var(--muted);letter-spacing:0.02em}
+h1{font-size:26px;font-weight:800;margin:4px 0 6px;letter-spacing:-0.02em;line-height:1.25}
+.sub{color:var(--muted);font-size:14px;margin:0 0 22px}
 
 /* date strip */
-.strip{display:flex;gap:4px;overflow-x:auto;padding:4px 2px 10px;scroll-snap-type:x proximity;scrollbar-width:thin}
-.month{flex:0 0 auto;align-self:stretch;display:flex;align-items:flex-end;padding:0 6px 22px;font-size:12px;font-weight:700;color:var(--muted);writing-mode:vertical-rl;letter-spacing:.05em}
-.day{flex:0 0 44px;scroll-snap-align:center;border:1px solid var(--line);background:var(--surface);border-radius:8px;padding:6px 0 0;text-align:center;cursor:pointer;color:var(--ink);font:inherit;display:flex;flex-direction:column;align-items:center;gap:2px;overflow:hidden}
+.strip{display:flex;gap:6px;overflow-x:auto;padding:4px 2px 12px;scroll-snap-type:x proximity;scrollbar-width:none}
+.strip::-webkit-scrollbar{display:none}
+.month{flex:0 0 auto;align-self:flex-end;padding:0 4px 30px;font-size:12px;font-weight:700;color:var(--ink);writing-mode:vertical-rl}
+.day{position:relative;flex:0 0 46px;scroll-snap-align:center;border:0;background:var(--surface);border-radius:12px;padding:8px 0 0;text-align:center;cursor:pointer;color:var(--ink);font:inherit;display:flex;flex-direction:column;align-items:center;gap:1px;overflow:hidden}
 .day .dw{font-size:11px;color:var(--muted)}
-.day.we .dw{color:var(--wkend)}
-.day .dn{font-size:16px;font-weight:700}
-.day .dots{height:6px;display:flex;gap:2px}
-.day .dots i{width:4px;height:4px;border-radius:50%;background:var(--blue)}
-.day .bar{width:100%;height:5px;margin-top:4px}
-.bar.peak{background:var(--blue)} .bar.off{background:var(--off)} .bar.post{background:var(--post)}
-.day[aria-pressed="true"]{border:2px solid var(--sign);box-shadow:0 0 0 2px var(--sign) inset}
-.day:focus-visible,.chip:focus-visible{outline:3px solid var(--blue);outline-offset:2px}
-.legend{display:flex;gap:14px;flex-wrap:wrap;font-size:12px;color:var(--muted);margin:2px 0 18px}
-.legend span::before{content:"";display:inline-block;width:14px;height:5px;margin-right:5px;vertical-align:middle}
-.lg-peak::before{background:var(--blue)} .lg-off::before{background:var(--off)} .lg-post::before{background:var(--post)}
-.lg-dot::before{width:5px!important;height:5px!important;border-radius:50%;background:var(--blue)}
+.day .dn{font-size:17px;font-weight:700}
+.day .dots{height:7px;display:flex;gap:2px;align-items:center}
+.day .dots i{width:4px;height:4px;border-radius:50%;background:var(--point)}
+.day .bar{width:100%;height:4px;margin-top:5px}
+.bar.peak{background:var(--peak)} .bar.off{background:var(--off)} .bar.post{background:var(--post)} .bar.pre{background:transparent}
+.day.pre{background:transparent;border:1px dashed var(--line)}
+.day.pre .dn{color:var(--faint)}
+.day.today::after{content:"오늘";position:absolute;top:0;left:0;right:0;font-size:9px;font-weight:700;color:var(--point);line-height:10px;padding-top:1px}
+.day.today{padding-top:11px}
+.day[aria-pressed="true"]{background:var(--ink);color:var(--bg)}
+.day[aria-pressed="true"] .dw{color:var(--faint)}
+.day[aria-pressed="true"] .dn{color:var(--bg)}
+.day:focus-visible,.chip:focus-visible{outline:2px solid var(--point);outline-offset:2px}
+.legend{display:flex;gap:14px;flex-wrap:wrap;font-size:12px;color:var(--muted);margin:2px 0 22px}
+.legend span::before{content:"";display:inline-block;width:14px;height:4px;margin-right:6px;vertical-align:middle}
+.lg-peak::before{background:var(--peak)} .lg-off::before{background:var(--off)} .lg-post::before{background:var(--post)}
+.lg-dot::before{width:5px!important;height:5px!important;border-radius:50%;background:var(--point)}
 
-/* sign header */
-.sign{background:var(--sign);color:var(--sign-ink);border-radius:10px;padding:14px 16px;display:flex;justify-content:space-between;align-items:baseline;gap:12px;flex-wrap:wrap}
-.sign .date{font-size:24px;font-weight:700}
-.sign .season{font-size:14px;font-weight:500}
-.banner{margin-top:10px;border-radius:8px;padding:10px 12px;font-size:13px;background:var(--warn-soft);color:var(--warn)}
+/* hero */
+.hero{background:var(--hero);color:var(--hero-ink);border-radius:16px;padding:22px 20px}
+.hero .label{font-size:13px;color:var(--hero-muted);margin:0 0 6px}
+.hero .date{font-size:28px;font-weight:800;letter-spacing:-0.02em}
+.hero .meta{margin-top:10px;display:flex;gap:6px;flex-wrap:wrap}
+.pill{font-size:12px;font-weight:700;padding:4px 10px;border-radius:999px;background:rgba(255,255,255,0.12);color:var(--hero-ink)}
+.pill.point{background:var(--point);color:var(--point-ink)}
+.notice{margin-top:10px;border-radius:12px;padding:12px 14px;font-size:13px;background:var(--point-soft);color:var(--ink)}
+.notice b{color:var(--point)}
 
-.filters{margin:18px 0 6px;display:flex;align-items:center;gap:8px;flex-wrap:wrap;font-size:13px;color:var(--muted)}
-.chip{border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:999px;padding:6px 14px;font:inherit;font-size:13px;cursor:pointer}
-.chip[aria-pressed="true"]{background:var(--blue);border-color:var(--blue);color:var(--surface)}
+.filters{margin:24px 0 4px;display:flex;align-items:center;gap:8px;flex-wrap:wrap;font-size:13px;color:var(--muted)}
+.chip{border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:999px;padding:7px 16px;font:inherit;font-size:13px;font-weight:600;cursor:pointer}
+.chip[aria-pressed="true"]{background:var(--ink);border-color:var(--ink);color:var(--bg)}
 
 /* resorts */
-.resort{border-top:1px solid var(--line);padding:18px 0 6px}
-.rhead{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px}
-.rhead h2{font-size:19px;margin:0;font-weight:700}
-.status{font-size:12px;font-weight:700;padding:3px 10px;border-radius:999px}
-.st-ok{background:var(--ok-soft);color:var(--ok)}
-.st-stay{background:var(--blue-soft);color:var(--blue)}
-.st-warn{background:var(--warn-soft);color:var(--warn)}
-.st-none{background:transparent;color:var(--muted);border:1px solid var(--line)}
-.cols{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.resort{padding:26px 0 8px;border-bottom:8px solid var(--surface)}
+.resort:last-of-type{border-bottom:0}
+.rhead{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:14px}
+.rhead h2{font-size:21px;margin:0;font-weight:800;letter-spacing:-0.02em}
+.status{font-size:12px;font-weight:700;padding:4px 10px;border-radius:6px}
+.st-ok{background:var(--point);color:var(--point-ink)}
+.st-stay{background:var(--ink);color:var(--bg)}
+.st-warn{background:var(--surface-2);color:var(--ink)}
+.st-none{background:transparent;color:var(--faint);border:1px solid var(--line)}
+.cols{display:grid;grid-template-columns:1fr 1fr;gap:16px}
 @media (max-width:560px){.cols{grid-template-columns:1fr}}
-.col h3{font-size:13px;color:var(--muted);font-weight:500;margin:0 0 6px}
-.row{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:10px 12px;margin-bottom:6px}
-.row .top{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap}
-.row .t{font-size:20px;font-weight:700}
-.row .p{font-weight:700}
-.row .sep{font-size:20px;color:var(--muted);font-weight:400}
-.row .tag{font-size:11px;padding:1px 7px;border-radius:4px;background:var(--blue-soft);color:var(--blue);font-weight:500}
-.row .tag.warn{background:var(--warn-soft);color:var(--warn)}
-.row .route{font-size:12px;color:var(--muted);margin-top:3px}
+.col h3{font-size:13px;color:var(--muted);font-weight:600;margin:0 0 8px}
+.row{background:var(--surface);border-radius:12px;padding:14px 14px;margin-bottom:8px}
+.row .top{display:flex;align-items:baseline;gap:6px;flex-wrap:wrap}
+.row .t{font-size:21px;font-weight:800;letter-spacing:-0.02em}
+.row .p{font-weight:700;font-size:15px;margin-right:2px}
+.row .sep{font-size:18px;color:var(--faint);margin:0 2px}
+.row .tag{font-size:11px;padding:2px 7px;border-radius:4px;background:var(--bg);color:var(--muted);font-weight:600;margin-left:auto}
+.row .tag.night{background:var(--ink);color:var(--bg)}
+.row .arr{font-size:13px;font-weight:700;color:var(--point);margin-top:3px}
+.row .route{font-size:12px;color:var(--muted);margin-top:6px}
 .row .loc{font-size:12px;margin-top:3px}
-.row .arr{font-size:13px;font-weight:700;color:var(--blue);margin-top:2px}
-.row .taxi{font-size:12px;margin-top:5px;padding-top:5px;border-top:1px dashed var(--line);color:var(--muted)}
+.row .loc::before{content:"·";margin-right:5px;color:var(--faint)}
+.row .taxi{font-size:12px;margin-top:8px;padding-top:8px;border-top:1px solid var(--line);color:var(--muted)}
 .empty{font-size:13px;color:var(--muted);padding:6px 0}
-.dim{opacity:.55}
+.dim{opacity:.45}
 
-.extra{border-top:1px solid var(--line);padding:18px 0 0;font-size:13px;color:var(--muted)}
-.extra h2{font-size:17px;color:var(--ink);margin:0 0 6px}
-.notes{margin-top:24px;font-size:12px;color:var(--muted);border-top:1px solid var(--line);padding-top:14px}
+.extra{margin-top:12px;background:var(--surface);border-radius:16px;padding:20px;font-size:13px;color:var(--muted)}
+.extra h2{font-size:17px;color:var(--ink);margin:0 0 6px;font-weight:800}
+.extra p{margin:0}
+.notes{margin-top:22px;font-size:12px;color:var(--faint)}
 .notes p{margin:0 0 6px}
 @media (prefers-reduced-motion:no-preference){.strip{scroll-behavior:smooth}}
 </style>
 </head>
 <body>
 <div class="wrap">
+  <div class="brand">X6+ SKI SHUTTLE</div>
   <h1>스키 셔틀 플래너 26/27</h1>
-  <p class="sub">X6+ 기준, 부평·송내·홍대 탑승 / 송내·홍대 귀가 노선만 모았어요. 날짜를 누르면 그날 탈 수 있는 차가 나와요.</p>
+  <p class="sub">부평·송내·홍대 탑승, 송내·홍대 귀가 노선만 모았어요.</p>
 
   <div class="strip" id="strip" role="group" aria-label="날짜 선택"></div>
   <div class="legend">
-    <span class="lg-peak">성수기</span><span class="lg-off">비수기</span><span class="lg-post">3/2 이후</span><span class="lg-dot">왕복·1박 가능한 스키장 수</span>
+    <span class="lg-peak">성수기</span><span class="lg-off">비수기</span><span class="lg-post">3/2 이후</span><span class="lg-dot">탈 수 있는 스키장 수</span>
   </div>
 
-  <div class="sign" id="sign"></div>
-  <div id="banners"></div>
+  <div class="hero" id="hero"></div>
+  <div id="notices"></div>
 
   <div class="filters">귀가 위치
     <button class="chip" data-back="songnae" aria-pressed="true">송내</button>
@@ -113,7 +127,7 @@ h1{font-size:22px;font-weight:700;margin:0;letter-spacing:-0.01em}
 
   <div class="extra">
     <h2>지산 · 엘리시안강촌</h2>
-    <p>X6+로 이용 가능하지만 각 리조트 자체 셔틀이라 이 시간표에 없어요. 26/27 노선이 공지되면 추가할 수 있어요. 지산은 평일 퇴근 후 야간 노선과 출근용 새벽 노선을 운영해 왔어요.</p>
+    <p>X6+로 이용 가능하지만 각 리조트 자체 셔틀이라 이 시간표에 없어요. 26/27 노선이 공지되면 추가할 예정이에요.</p>
   </div>
 
   <div class="notes">
@@ -164,7 +178,7 @@ const BACK = [
 const TO_NAME = {songnae:"송내", hongdae:"홍대"};
 const DOW = ["일","월","화","수","목","금","토"];
 
-const START = new Date(2026,11,5), END = new Date(2027,2,14);
+const SEASON_START = new Date(2026,11,5), END = new Date(2027,2,14);
 const key = d => `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;
 function season(d){
   const k = key(d);
@@ -189,6 +203,8 @@ const addDay = (d,n) => new Date(d.getFullYear(), d.getMonth(), d.getDate()+n);
 
 let backFilter = new Set(["songnae","hongdae"]);
 let selected;
+const TODAY = (() => { const t = new Date(); return new Date(t.getFullYear(), t.getMonth(), t.getDate()); })();
+const STRIP_START = TODAY < SEASON_START ? TODAY : SEASON_START;
 
 function plan(res, d){
   const goes = GO.filter(g => g.res.includes(res) && runs(g,d));
@@ -205,23 +221,27 @@ function plan(res, d){
 function countOK(d){
   return RESORTS.filter(r => { const p = plan(r,d); return p.status[0]==="st-ok" || p.status[0]==="st-stay"; }).length;
 }
+function firstAvailable(from){
+  for (let d = new Date(from); d <= END; d = addDay(d,1)) if (countOK(d) > 0) return d;
+  return null;
+}
 
 function buildStrip(){
   const strip = document.getElementById("strip");
   strip.innerHTML = "";
   let m = -1;
-  for (let d = new Date(START); d <= END; d = addDay(d,1)){
+  for (let d = new Date(STRIP_START); d <= END; d = addDay(d,1)){
     if (d.getMonth() !== m){
       m = d.getMonth();
       const lab = document.createElement("div"); lab.className="month"; lab.textContent = `${m+1}월`; strip.appendChild(lab);
     }
     const b = document.createElement("button");
-    const dow = d.getDay();
-    b.className = "day" + (dow===0||dow===6 ? " we" : "");
+    const dow = d.getDay(), s = season(d);
+    b.className = "day" + (s==="pre" ? " pre" : "") + (key(d)===key(TODAY) ? " today" : "");
     b.dataset.k = key(d);
-    b.setAttribute("aria-label", `${d.getMonth()+1}월 ${d.getDate()}일 ${DOW[dow]}요일, ${SEASON_NAME[season(d)]}`);
+    b.setAttribute("aria-label", `${d.getMonth()+1}월 ${d.getDate()}일 ${DOW[dow]}요일, ${SEASON_NAME[s]}${key(d)===key(TODAY)?", 오늘":""}`);
     const n = countOK(d);
-    b.innerHTML = `<span class="dw">${DOW[dow]}</span><span class="dn num">${d.getDate()}</span><span class="dots">${"<i></i>".repeat(n)}</span><span class="bar ${season(d)}"></span>`;
+    b.innerHTML = `<span class="dw">${DOW[dow]}</span><span class="dn num">${d.getDate()}</span><span class="dots">${"<i></i>".repeat(n)}</span><span class="bar ${s}"></span>`;
     const dd = new Date(d);
     b.addEventListener("click", () => select(dd));
     strip.appendChild(b);
@@ -229,7 +249,8 @@ function buildStrip(){
 }
 
 function rowGo(g, res){
-  return `<div class="row"><div class="top"><span class="t num">${g.t}</span><span class="p">${g.place}</span>${g.t2 ? `<span class="sep">/</span><span class="t num">${g.t2}</span><span class="p">${g.place2}</span>` : ""}<span class="tag${g.night?" warn":""}">${g.tag}</span></div>
+  const second = g.t2 ? `<span class="sep">/</span><span class="t num">${g.t2}</span><span class="p">${g.place2}</span>` : "";
+  return `<div class="row"><div class="top"><span class="t num">${g.t}</span><span class="p">${g.place}</span>${second}<span class="tag${g.night?" night":""}">${g.tag}</span></div>
   <div class="arr num">스키장 도착 약 ${g.arr[res]}</div>
   <div class="route">${g.route}</div>
   ${g.locs.map(l => `<div class="loc">${LOC[l]}</div>`).join("")}
@@ -242,24 +263,29 @@ function rowBack(b, prefix){
 }
 
 function render(){
-  const d = selected, s = season(d), dow = d.getDay();
-  document.getElementById("sign").innerHTML =
-    `<span class="date num">${d.getFullYear()}.${String(d.getMonth()+1).padStart(2,"0")}.${String(d.getDate()).padStart(2,"0")} ${DOW[dow]}</span><span class="season">${SEASON_NAME[s]}</span>`;
-  const k = key(d), banners = [];
-  if (k >= "2027-02-05" && k <= "2027-02-09") banners.push("구정 연휴 기간이에요. 단축 노선으로 운행해서 아래 시간표와 다를 수 있어요. 공지를 확인하세요.");
-  if (s === "post") banners.push("3/2부터는 송내 탑승과 홍대 오전차가 모두 없어요.");
-  document.getElementById("banners").innerHTML = banners.map(t => `<div class="banner">${t}</div>`).join("");
+  const d = selected, s = season(d), dow = d.getDay(), k = key(d);
+  const isToday = k === key(TODAY);
+  const n = countOK(d);
+  document.getElementById("hero").innerHTML =
+    `<p class="label">${isToday ? "오늘" : "선택한 날짜"}</p>
+     <div class="date num">${d.getMonth()+1}월 ${d.getDate()}일 ${DOW[dow]}요일</div>
+     <div class="meta"><span class="pill">${SEASON_NAME[s]}</span><span class="pill point">스키장 ${n}곳 이용 가능</span></div>`;
+  const notices = [];
+  if (TODAY < SEASON_START && k === key(SEASON_START) && !isToday)
+    notices.push(`아직 셔틀 운행 전이에요. <b>가장 빠른 운행일</b>부터 보여드려요.`);
+  if (s === "pre") notices.push(`셔틀 운행은 <b>12월 5일(토)</b>부터 시작해요. 12/5 이전에 스키장이 열리면 서울 일부 노선만 임시 운행해요.`);
+  if (k >= "2027-02-05" && k <= "2027-02-09") notices.push("구정 연휴 기간이에요. 단축 노선으로 운행해서 아래 시간표와 다를 수 있어요.");
+  if (s === "post") notices.push("3/2부터는 부평·송내 탑승과 홍대 오전차가 모두 없어요.");
+  document.getElementById("notices").innerHTML = notices.map(t => `<div class="notice">${t}</div>`).join("");
 
   document.getElementById("resorts").innerHTML = RESORTS.map(res => {
     const p = plan(res, d);
-    let goHtml = p.goes.length ? p.goes.map(g => rowGo(g, res)).join("") : `<div class="empty">이 날은 탈 수 있는 차가 없어요.</div>`;
+    const goHtml = p.goes.length ? p.goes.map(g => rowGo(g, res)).join("") : `<div class="empty">이 날은 탈 수 있는 차가 없어요.</div>`;
     let backHtml = "";
-    if (p.dayGo.length){
-      backHtml += p.backs.length ? p.backs.map(b => rowBack(b)).join("") : `<div class="empty">선택한 귀가 위치로 오는 차가 없어요. 귀가 위치를 바꿔보세요.</div>`;
-    }
-    if (p.nightGo.length){
+    if (p.dayGo.length)
+      backHtml += p.backs.length ? p.backs.map(b => rowBack(b)).join("") : `<div class="empty">선택한 귀가 위치로 오는 차가 없어요.</div>`;
+    if (p.nightGo.length)
       backHtml += p.nextBacks.length ? p.nextBacks.map(b => rowBack(b, "다음 날 토")).join("") : `<div class="empty">다음 날 선택한 위치로 오는 차가 없어요.</div>`;
-    }
     if (!p.goes.length) backHtml = `<div class="empty">—</div>`;
     return `<section class="resort${p.status[0]==="st-none"?" dim":""}">
       <div class="rhead"><h2>${res}</h2><span class="status ${p.status[0]}">${p.status[1]}</span></div>
@@ -270,10 +296,10 @@ function render(){
   document.querySelectorAll(".day").forEach(b => b.setAttribute("aria-pressed", b.dataset.k === k ? "true" : "false"));
 }
 
-function select(d){
+function select(d, instant){
   selected = d; render();
   const el = document.querySelector(`.day[data-k="${key(d)}"]`);
-  if (el) el.scrollIntoView({inline:"center", block:"nearest"});
+  if (el) el.scrollIntoView({inline:"center", block:"nearest", behavior: instant ? "auto" : "smooth"});
 }
 
 document.querySelectorAll(".chip").forEach(c => c.addEventListener("click", () => {
@@ -284,9 +310,13 @@ document.querySelectorAll(".chip").forEach(c => c.addEventListener("click", () =
 }));
 
 buildStrip();
-const today = new Date(); today.setHours(0,0,0,0);
-let init = (today >= START && today <= END) ? today : new Date(2026,11,26);
-select(init);
+let init;
+if (TODAY >= SEASON_START && TODAY <= END) init = countOK(TODAY) > 0 ? TODAY : (firstAvailable(TODAY) || TODAY);
+else if (TODAY < SEASON_START) init = firstAvailable(SEASON_START) || SEASON_START;
+else init = END;
+window.scrollTo(0,0);
+select(init, true);
+window.scrollTo(0,0);
 </script>
 </body>
 </html>
