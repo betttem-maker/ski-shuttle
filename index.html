@@ -2,7 +2,16 @@
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/png" href="icon-192.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="스키셔틀">
+<meta name="theme-color" content="#FFFFFF" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)">
 <title>스키 셔틀 플래너 26/27</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
 <style>
@@ -24,7 +33,7 @@
 }
 *{box-sizing:border-box}
 body{margin:0;background:var(--bg);color:var(--ink);font-family:"Pretendard",-apple-system,system-ui,sans-serif;line-height:1.5;-webkit-font-smoothing:antialiased;letter-spacing:-0.01em}
-.wrap{max-width:720px;margin:0 auto;padding:28px 20px 56px}
+.wrap{max-width:720px;margin:0 auto;padding:max(28px, calc(env(safe-area-inset-top) + 12px)) 20px max(56px, calc(env(safe-area-inset-bottom) + 32px))}
 .num{font-variant-numeric:tabular-nums}
 .brand .ver{font-weight:600;color:var(--faint);margin-left:6px;letter-spacing:0}
 .brand{font-size:13px;font-weight:700;color:var(--muted);letter-spacing:0.02em}
@@ -117,7 +126,7 @@ h1{font-size:26px;font-weight:800;margin:4px 0 6px;letter-spacing:-0.02em;line-h
 </head>
 <body>
 <div class="wrap">
-  <div class="brand">X6+ SKI SHUTTLE <span class="ver">v0.8</span></div>
+  <div class="brand">X6+ SKI SHUTTLE <span class="ver">v0.9</span></div>
   <h1>스키 셔틀 플래너 26/27</h1>
   <p class="sub">부평·송내·홍대 탑승, 송내·홍대 귀가 노선만 모았어요.</p>
 
@@ -157,7 +166,7 @@ h1{font-size:26px;font-weight:800;margin:4px 0 6px;letter-spacing:-0.02em;line-h
     <p>요금은 동계 시즌(11/28~) 대인 기준이에요. 왕복 요금은 5일 이내에 돌아올 때만 적용되고, 현장 구매는 빈자리가 있을 때만 탈 수 있어요.</p>
     <p>예약 인원이 없으면 운행하지 않아요. 공휴일 운행 여부는 예약할 때 확인하세요.</p>
     <p>휘닉스파크, 서현 탑승, 새벽 홍대 탑승 노선은 제외했어요.</p>
-    <p>버전 v0.8</p>
+    <p>버전 v0.9</p>
   </div>
 </div>
 
@@ -364,6 +373,7 @@ else init = END;
 window.scrollTo(0,0);
 select(init, true);
 window.scrollTo(0,0);
+if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(()=>{});
 </script>
 </body>
 </html>

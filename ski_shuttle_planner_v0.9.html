@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/png" href="icon-192.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="스키셔틀">
+<meta name="theme-color" content="#FFFFFF" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)">
+<title>스키 셔틀 플래너 26/27</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<style>
+:root{
+  --bg:#FFFFFF; --surface:#F4F4F5; --surface-2:#EBEBED; --ink:#0A0A0A; --muted:#71717A; --faint:#A1A1AA; --line:#E4E4E7;
+  --hero:#0A0A0A; --hero-ink:#FFFFFF; --hero-muted:#A1A1AA;
+  --point:#F0652A; --point-soft:#FDE9DF; --point-ink:#FFFFFF;
+  --peak:#0A0A0A; --off:#A1A1AA; --post:#E4E4E7;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark){
+  :root{
+    --bg:#000000; --surface:#141416; --surface-2:#1E1E21; --ink:#F4F4F5; --muted:#A1A1AA; --faint:#71717A; --line:#27272A;
+    --hero:#141416; --hero-ink:#FFFFFF; --hero-muted:#A1A1AA;
+    --point:#F26B30; --point-soft:#3A1E12; --point-ink:#FFFFFF;
+    --peak:#F4F4F5; --off:#71717A; --post:#3F3F46;
+    color-scheme: dark;
+  }
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"Pretendard",-apple-system,system-ui,sans-serif;line-height:1.5;-webkit-font-smoothing:antialiased;letter-spacing:-0.01em}
+.wrap{max-width:720px;margin:0 auto;padding:max(28px, calc(env(safe-area-inset-top) + 12px)) 20px max(56px, calc(env(safe-area-inset-bottom) + 32px))}
+.num{font-variant-numeric:tabular-nums}
+.brand .ver{font-weight:600;color:var(--faint);margin-left:6px;letter-spacing:0}
+.brand{font-size:13px;font-weight:700;color:var(--muted);letter-spacing:0.02em}
+h1{font-size:26px;font-weight:800;margin:4px 0 6px;letter-spacing:-0.02em;line-height:1.25}
+.sub{color:var(--muted);font-size:14px;margin:0 0 22px}
+
+/* date strip */
+.strip{display:flex;gap:6px;overflow-x:auto;padding:4px 2px 12px;scroll-snap-type:x proximity;scrollbar-width:none}
+.strip::-webkit-scrollbar{display:none}
+.month{flex:0 0 auto;align-self:flex-end;padding:0 4px 30px;font-size:12px;font-weight:700;color:var(--ink);writing-mode:vertical-rl}
+.day{position:relative;flex:0 0 46px;scroll-snap-align:center;border:0;background:var(--surface);border-radius:12px;padding:8px 0 0;text-align:center;cursor:pointer;color:var(--ink);font:inherit;display:flex;flex-direction:column;align-items:center;gap:1px;overflow:hidden}
+.day .dw{font-size:11px;color:var(--muted)}
+.day .dn{font-size:17px;font-weight:700}
+.day .dots{height:7px;display:flex;gap:2px;align-items:center}
+.day .dots i{width:4px;height:4px;border-radius:50%;background:var(--point)}
+.day .bar{width:100%;height:4px;margin-top:5px}
+.bar.peak{background:var(--peak)} .bar.off{background:var(--off)} .bar.post{background:var(--post)} .bar.pre{background:transparent}
+.day.pre{background:transparent;border:1px dashed var(--line)}
+.day.pre .dn{color:var(--faint)}
+.day.today::after{content:"오늘";position:absolute;top:0;left:0;right:0;font-size:9px;font-weight:700;color:var(--point);line-height:10px;padding-top:1px}
+.day.today{padding-top:11px}
+.day[aria-pressed="true"]{background:var(--ink);color:var(--bg)}
+.day[aria-pressed="true"] .dw{color:var(--faint)}
+.day[aria-pressed="true"] .dn{color:var(--bg)}
+.day:focus-visible,.chip:focus-visible{outline:2px solid var(--point);outline-offset:2px}
+.legend{display:flex;gap:14px;flex-wrap:wrap;font-size:12px;color:var(--muted);margin:2px 0 22px}
+.legend span::before{content:"";display:inline-block;width:14px;height:4px;margin-right:6px;vertical-align:middle}
+.lg-peak::before{background:var(--peak)} .lg-off::before{background:var(--off)} .lg-post::before{background:var(--post)}
+.lg-dot::before{width:5px!important;height:5px!important;border-radius:50%;background:var(--point)}
+
+/* hero */
+.hero{background:var(--hero);color:var(--hero-ink);border-radius:16px;padding:22px 20px}
+.hero .label{font-size:13px;color:var(--hero-muted);margin:0 0 6px}
+.hero .date{font-size:28px;font-weight:800;letter-spacing:-0.02em}
+.hero .meta{margin-top:10px;display:flex;gap:6px;flex-wrap:wrap}
+.pill{font-size:12px;font-weight:700;padding:4px 10px;border-radius:999px;background:rgba(255,255,255,0.12);color:var(--hero-ink)}
+.pill.point{background:var(--point);color:var(--point-ink)}
+.notice{margin-top:10px;border-radius:12px;padding:12px 14px;font-size:13px;background:var(--point-soft);color:var(--ink)}
+.notice b{color:var(--point)}
+
+.filters{margin:24px 0 4px;display:flex;align-items:center;gap:8px;flex-wrap:wrap;font-size:13px;color:var(--muted)}
+.chip{border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:999px;padding:7px 16px;font:inherit;font-size:13px;font-weight:600;cursor:pointer}
+.chip[aria-pressed="true"]{background:var(--ink);border-color:var(--ink);color:var(--bg)}
+
+/* resorts */
+.resort{padding:26px 0 8px;border-bottom:8px solid var(--surface)}
+.resort:last-of-type{border-bottom:0}
+.rhead{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:14px}
+.rhead h2{font-size:21px;margin:0;font-weight:800;letter-spacing:-0.02em}
+.status{font-size:12px;font-weight:700;padding:4px 10px;border-radius:6px}
+.st-ok{background:var(--point);color:var(--point-ink)}
+.st-stay{background:var(--ink);color:var(--bg)}
+.st-warn{background:var(--surface-2);color:var(--ink)}
+.st-none{background:transparent;color:var(--faint);border:1px solid var(--line)}
+.cols{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+@media (max-width:560px){.cols{grid-template-columns:1fr}}
+.col h3{font-size:13px;color:var(--muted);font-weight:600;margin:0 0 8px}
+.row{background:var(--surface);border-radius:12px;padding:14px 14px;margin-bottom:8px}
+.row .top{display:flex;align-items:baseline;gap:6px;flex-wrap:wrap}
+.row .t{font-size:21px;font-weight:800;letter-spacing:-0.02em}
+.row .p{font-weight:700;font-size:15px;margin-right:2px}
+.row .sep{font-size:18px;color:var(--faint);margin:0 2px}
+.row .tag{font-size:11px;padding:2px 7px;border-radius:4px;background:var(--bg);color:var(--muted);font-weight:600;margin-left:auto}
+.row .tag.night{background:var(--ink);color:var(--bg)}
+.row .arr{font-size:13px;font-weight:700;color:var(--point);margin-top:3px}
+.row .route{font-size:12px;color:var(--muted);margin-top:6px}
+.row .loc{font-size:12px;margin-top:3px}
+.row .loc::before{content:"·";margin-right:5px;color:var(--faint)}
+.row .taxi{font-size:12px;margin-top:8px;padding-top:8px;border-top:1px solid var(--line);color:var(--muted)}
+.empty{font-size:13px;color:var(--muted);padding:6px 0}
+.dim{opacity:.45}
+
+.fare{display:flex;align-items:center;justify-content:space-between;gap:12px;background:var(--surface);border-radius:12px;padding:12px 14px;margin-bottom:14px}
+.fare .prices{font-size:13px;color:var(--muted);line-height:1.6}
+.fare .prices b{color:var(--ink);font-size:15px;font-weight:800;margin-right:2px}
+.fare .sub2{font-size:12px;color:var(--muted)}
+.fare .member{font-size:12px;color:var(--point);font-weight:600}
+.book{flex:0 0 auto;background:var(--ink);color:var(--bg);text-decoration:none;font-size:13px;font-weight:700;padding:10px 14px;border-radius:10px;white-space:nowrap}
+.book:focus-visible{outline:2px solid var(--point);outline-offset:2px}
+.extra + .extra{margin-top:10px}
+.extra ul{margin:8px 0 0;padding-left:18px}
+.extra li{margin:2px 0}
+.extra{margin-top:12px;background:var(--surface);border-radius:16px;padding:20px;font-size:13px;color:var(--muted)}
+.extra h2{font-size:17px;color:var(--ink);margin:0 0 6px;font-weight:800}
+.extra p{margin:0}
+.notes{margin-top:22px;font-size:12px;color:var(--faint)}
+.notes p{margin:0 0 6px}
+@media (prefers-reduced-motion:no-preference){.strip{scroll-behavior:smooth}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="brand">X6+ SKI SHUTTLE <span class="ver">v0.9</span></div>
+  <h1>스키 셔틀 플래너 26/27</h1>
+  <p class="sub">부평·송내·홍대 탑승, 송내·홍대 귀가 노선만 모았어요.</p>
+
+  <div class="strip" id="strip" role="group" aria-label="날짜 선택"></div>
+  <div class="legend">
+    <span class="lg-peak">성수기</span><span class="lg-off">비수기</span><span class="lg-post">3/2 이후</span><span class="lg-dot">탈 수 있는 스키장 수</span>
+  </div>
+
+  <div class="hero" id="hero"></div>
+  <div id="notices"></div>
+
+  <div class="filters">귀가 위치
+    <button class="chip" data-back="songnae" aria-pressed="true">송내</button>
+    <button class="chip" data-back="hongdae" aria-pressed="true">홍대</button>
+  </div>
+
+  <div id="resorts"></div>
+
+  <div class="extra">
+    <h2>KD 교통시즌권</h2>
+    <p>알펜시아·모나용평·웰리힐리·하이원 셔틀을 횟수 제한 없이 탈 수 있는 기명식 이용권이에요.</p>
+    <ul>
+      <li>이용 기간: 스키장 정식 개장 주말 ~ 2027년 3월 1일 (임시 개장일 제외)</li>
+      <li>시즌권이 있어도 매번 사전 예약 필수. 예약 후 노쇼가 2회 이상이면 건당 2,000원 위약금</li>
+      <li>환불: 개장 전 전액, 개장 ~ 12/31은 이용 횟수만큼 공제, 1/1부터 환불 불가</li>
+      <li>개장 첫 1~2주와 설 연휴에는 단축 운행될 수 있어요</li>
+    </ul>
+  </div>
+
+  <div class="extra">
+    <h2>지산 · 엘리시안강촌</h2>
+    <p>X6+로 이용 가능하지만 각 리조트 자체 셔틀이라 이 시간표에 없어요. 26/27 노선이 공지되면 추가할 예정이에요.</p>
+  </div>
+
+  <div class="notes">
+    <p>도착 시간은 원본 시간표에 없어서 거리 기준으로 추정한 값이에요. 주말 오후 귀가길은 정체로 1시간 이상 늦어질 수 있어요.</p>
+    <p>요금은 동계 시즌(11/28~) 대인 기준이에요. 왕복 요금은 5일 이내에 돌아올 때만 적용되고, 현장 구매는 빈자리가 있을 때만 탈 수 있어요.</p>
+    <p>예약 인원이 없으면 운행하지 않아요. 공휴일 운행 여부는 예약할 때 확인하세요.</p>
+    <p>휘닉스파크, 서현 탑승, 새벽 홍대 탑승 노선은 제외했어요.</p>
+    <p>버전 v0.9</p>
+  </div>
+</div>
+
+<script>
+const LOC = {
+  songnae:"송내역 남광장 150m 직진, CU편의점 앞",
+  bupyeong:"부평역 북광장 노벨약국 앞 (지하상가 11번 출구)",
+  hongdae:"홍대입구역 8번출구 100m, 스타벅스 홍대공항철도역점 앞",
+  stadium:"잠실종합운동장 6번출구 앞 횡단보도 근처 (위치 변경)"
+};
+const RESORTS = ["알펜시아","모나용평","웰리힐리","하이원"];
+// rules: [성수기, 비수기, 3/2이후] — daily | weekend | fri | none
+const GO = [
+  {res:["알펜시아","모나용평"], t:"05:40", place:"부평", t2:"06:10", place2:"송내", locs:["bupyeong","songnae"], r:["daily","weekend","none"], tag:"종일",
+   arr:{"알펜시아":"09:00","모나용평":"09:00"},
+   taxi:"택시: 부평역 약 1만원, 15분 / 송내역 약 1.5만원, 22분",
+   route:"인천선: 인천터미널 05:15 → 간석오거리 05:25 → 부평역 05:40 → 송내 06:10"},
+  {res:["웰리힐리"], t:"05:40", place:"부평", t2:"06:10", place2:"송내", locs:["bupyeong","songnae"], r:["weekend","weekend","none"], tag:"종일",
+   arr:{"웰리힐리":"08:20"},
+   taxi:"택시: 부평역 약 1만원, 15분 / 송내역 약 1.5만원, 22분",
+   route:"인천선: 인천터미널 05:15 → 간석오거리 05:25 → 부평역 05:40 → 송내 06:10"},
+  {res:["알펜시아","모나용평","웰리힐리","하이원"], t:"08:50", place:"홍대", locs:["hongdae"], r:["daily","daily","none"], tag:"반나절",
+   arr:{"알펜시아":"12:30","모나용평":"12:30","웰리힐리":"11:50","하이원":"13:30"},
+   route:"신촌선 오전차: 홍대 08:50 → 신촌 08:55 → 광흥창 09:00 → 마포 09:10 → 종합운동장 10:00"},
+  {res:["알펜시아","모나용평","웰리힐리"], t:"20:00", place:"잠실종합운동장", locs:["stadium"], r:["fri","none","none"], tag:"1박", night:true,
+   arr:{"알펜시아":"23:00","모나용평":"23:00","웰리힐리":"22:00"},
+   route:"야간차 잠실선. 장비는 카풀·쏘카로 미리 옮겨두기"}
+];
+const BACK = [
+  {res:"알펜시아", t:"12:30", to:"hongdae", arr:"16:30", r:["daily","daily","none"], route:"잠실역 → 종합운동장 → 명동 → 신촌 → 홍대"},
+  {res:"알펜시아", t:"16:30", to:"hongdae", arr:"20:30", r:["daily","daily","daily"], route:"잠실역 → 종합운동장 → 명동 → 신촌 → 홍대"},
+  {res:"알펜시아", t:"16:30", to:"songnae", arr:"20:30", r:["daily","weekend","none"], route:"서현 → 범계 → 송내 → 백석"},
+  {res:"모나용평", t:"13:00", to:"hongdae", arr:"17:00", r:["daily","daily","daily"], route:"잠실역 → 종합운동장 → 명동 → 신촌 → 홍대"},
+  {res:"모나용평", t:"17:00", to:"hongdae", arr:"21:00", r:["daily","daily","daily"], route:"잠실역 → 종합운동장 → 명동 → 신촌 → 홍대"},
+  {res:"모나용평", t:"17:00", to:"songnae", arr:"21:00", r:["daily","weekend","none"], route:"서현 → 범계 → 송내 → 백석"},
+  {res:"웰리힐리", t:"13:00", to:"hongdae", arr:"16:00", r:["daily","daily","none"], route:"잠실 → 종합운동장 → 명동 → 신촌 → 홍대"},
+  {res:"웰리힐리", t:"17:00", to:"hongdae", arr:"20:00", r:["daily","daily","none"], route:"잠실 → 종합운동장 → 명동 → 신촌 → 홍대"},
+  {res:"웰리힐리", t:"17:00", to:"songnae", arr:"20:00", r:["weekend","weekend","none"], route:"서현 → 송내"},
+  {res:"하이원", t:"13:30", to:"hongdae", arr:"18:00", r:["daily","daily","none"], route:"잠실역 → 종합운동장 → 명동 → 신촌 → 홍대"},
+  {res:"하이원", t:"17:00", to:"hongdae", arr:"21:30", r:["daily","daily","daily"], route:"잠실역 → 종합운동장 → 명동 → 신촌 → 홍대"}
+];
+const TO_NAME = {songnae:"송내", hongdae:"홍대"};
+const DOW = ["일","월","화","수","목","금","토"];
+
+const SEASON_START = new Date(2026,11,5), END = new Date(2027,2,14);
+const key = d => `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;
+function season(d){
+  const k = key(d);
+  if (k < "2026-12-05") return "pre";
+  if (k <= "2026-12-25") return "off";
+  if (k <= "2027-02-14") return "peak";
+  if (k <= "2027-03-01") return "off";
+  return "post";
+}
+const SEASON_NAME = {pre:"운행 전", off:"비수기", peak:"성수기", post:"3/2 이후"};
+function ruleOK(rule, dow){
+  if (rule==="daily") return true;
+  if (rule==="weekend") return dow===0 || dow===6;
+  if (rule==="fri") return dow===5;
+  return false;
+}
+function runs(svc, d){
+  const s = season(d); if (s==="pre") return false;
+  return ruleOK(svc.r[{peak:0,off:1,post:2}[s]], d.getDay());
+}
+const addDay = (d,n) => new Date(d.getFullYear(), d.getMonth(), d.getDate()+n);
+
+const FARE = {
+  "알펜시아": {url:"https://skibus.purplebus.co.kr/Ap/", one:20000, rt:36000, onsite:22000},
+  "모나용평": {url:"https://skibus.purplebus.co.kr/Yp/", one:20000, rt:36000, onsite:22000,
+              member:{label:"용평 할인쿠폰 회원", one:18000, rt:32000}},
+  "웰리힐리": {url:"https://skibus.purplebus.co.kr/Wh/", one:16000, rt:30000, onsite:18000,
+              note:"25/26 기준 요금이라 26/27에 바뀔 수 있어요"},
+  "하이원":   {url:"https://skibus.purplebus.co.kr/Hi/", one:22000, rt:38000, onsite:25000,
+              note:"밸리콘도에서만 승하차. 돌아올 때 타는 곳은 콘도 입구 삼거리 대형버스 주차장(내린 곳과 달라요)"}
+};
+const won = n => n.toLocaleString("ko-KR") + "원";
+function fareHtml(res){
+  const f = FARE[res];
+  let body;
+  if (f.one){
+    body = `<div class="prices">편도 <b class="num">${won(f.one)}</b> · 왕복 <b class="num">${won(f.rt)}</b></div>
+      <div class="sub2">현장 구매 편도 ${won(f.onsite)}${f.note ? ` · ${f.note}` : ""}</div>
+      ${f.member ? `<div class="member">${f.member.label}: 편도 ${won(f.member.one)} · 왕복 ${won(f.member.rt)}</div>` : ""}`;
+  } else {
+    body = `<div class="sub2">${f.note}</div>`;
+  }
+  return `<div class="fare"><div>${body}</div><a class="book" href="${f.url}" target="_blank" rel="noopener">예매하기 ›</a></div>`;
+}
+let backFilter = new Set(["songnae","hongdae"]);
+let selected;
+const TODAY = (() => { const t = new Date(); return new Date(t.getFullYear(), t.getMonth(), t.getDate()); })();
+const STRIP_START = TODAY < SEASON_START ? TODAY : SEASON_START;
+
+function plan(res, d){
+  const goes = GO.filter(g => g.res.includes(res) && runs(g,d));
+  const backs = BACK.filter(b => b.res===res && backFilter.has(b.to) && runs(b,d));
+  const nextBacks = BACK.filter(b => b.res===res && backFilter.has(b.to) && runs(b, addDay(d,1)));
+  const dayGo = goes.filter(g => !g.night), nightGo = goes.filter(g => g.night);
+  let status;
+  if (!goes.length) status = ["st-none","운행 없음"];
+  else if (dayGo.length && backs.length) status = ["st-ok","당일 왕복 가능"];
+  else if (nightGo.length && nextBacks.length) status = ["st-stay","1박 코스"];
+  else status = ["st-warn","귀가편 없음"];
+  return {goes, backs, nextBacks, dayGo, nightGo, status};
+}
+function countOK(d){
+  return RESORTS.filter(r => { const p = plan(r,d); return p.status[0]==="st-ok" || p.status[0]==="st-stay"; }).length;
+}
+function firstAvailable(from){
+  for (let d = new Date(from); d <= END; d = addDay(d,1)) if (countOK(d) > 0) return d;
+  return null;
+}
+
+function buildStrip(){
+  const strip = document.getElementById("strip");
+  strip.innerHTML = "";
+  let m = -1;
+  for (let d = new Date(STRIP_START); d <= END; d = addDay(d,1)){
+    if (d.getMonth() !== m){
+      m = d.getMonth();
+      const lab = document.createElement("div"); lab.className="month"; lab.textContent = `${m+1}월`; strip.appendChild(lab);
+    }
+    const b = document.createElement("button");
+    const dow = d.getDay(), s = season(d);
+    b.className = "day" + (s==="pre" ? " pre" : "") + (key(d)===key(TODAY) ? " today" : "");
+    b.dataset.k = key(d);
+    b.setAttribute("aria-label", `${d.getMonth()+1}월 ${d.getDate()}일 ${DOW[dow]}요일, ${SEASON_NAME[s]}${key(d)===key(TODAY)?", 오늘":""}`);
+    const n = countOK(d);
+    b.innerHTML = `<span class="dw">${DOW[dow]}</span><span class="dn num">${d.getDate()}</span><span class="dots">${"<i></i>".repeat(n)}</span><span class="bar ${s}"></span>`;
+    const dd = new Date(d);
+    b.addEventListener("click", () => select(dd));
+    strip.appendChild(b);
+  }
+}
+
+function rowGo(g, res){
+  const second = g.t2 ? `<span class="sep">/</span><span class="t num">${g.t2}</span><span class="p">${g.place2}</span>` : "";
+  return `<div class="row"><div class="top"><span class="t num">${g.t}</span><span class="p">${g.place}</span>${second}<span class="tag${g.night?" night":""}">${g.tag}</span></div>
+  <div class="arr num">스키장 도착 약 ${g.arr[res]}</div>
+  <div class="route">${g.route}</div>
+  ${g.locs.map(l => `<div class="loc">${LOC[l]}</div>`).join("")}
+  ${g.taxi ? `<div class="taxi">${g.taxi}</div>` : ""}</div>`;
+}
+function rowBack(b, prefix){
+  return `<div class="row"><div class="top"><span class="t num">${b.t}</span><span class="p">${TO_NAME[b.to]} 하차</span>${prefix?`<span class="tag">${prefix}</span>`:""}</div>
+  <div class="arr num">${TO_NAME[b.to]} 도착 약 ${b.arr}</div>
+  <div class="route">${b.route}</div><div class="loc">${LOC[b.to]}</div></div>`;
+}
+
+function render(){
+  const d = selected, s = season(d), dow = d.getDay(), k = key(d);
+  const isToday = k === key(TODAY);
+  const n = countOK(d);
+  document.getElementById("hero").innerHTML =
+    `<p class="label">${isToday ? "오늘" : "선택한 날짜"}</p>
+     <div class="date num">${d.getMonth()+1}월 ${d.getDate()}일 ${DOW[dow]}요일</div>
+     <div class="meta"><span class="pill">${SEASON_NAME[s]}</span><span class="pill point">스키장 ${n}곳 이용 가능</span></div>`;
+  const notices = [];
+  if (TODAY < SEASON_START && k === key(SEASON_START) && !isToday)
+    notices.push(`아직 셔틀 운행 전이에요. <b>가장 빠른 운행일</b>부터 보여드려요.`);
+  if (s === "pre") notices.push(`셔틀 운행은 <b>12월 5일(토)</b>부터 시작해요. 12/5 이전에 스키장이 열리면 서울 일부 노선만 임시 운행해요.`);
+  if (k >= "2027-02-05" && k <= "2027-02-09") notices.push("구정 연휴 기간이에요. 단축 노선으로 운행해서 아래 시간표와 다를 수 있어요.");
+  if (s === "post") notices.push("3/2부터는 부평·송내 탑승과 홍대 오전차가 모두 없어요.");
+  document.getElementById("notices").innerHTML = notices.map(t => `<div class="notice">${t}</div>`).join("");
+
+  document.getElementById("resorts").innerHTML = RESORTS.map(res => {
+    const p = plan(res, d);
+    const goHtml = p.goes.length ? p.goes.map(g => rowGo(g, res)).join("") : `<div class="empty">이 날은 탈 수 있는 차가 없어요.</div>`;
+    let backHtml = "";
+    if (p.dayGo.length)
+      backHtml += p.backs.length ? p.backs.map(b => rowBack(b)).join("") : `<div class="empty">선택한 귀가 위치로 오는 차가 없어요.</div>`;
+    if (p.nightGo.length)
+      backHtml += p.nextBacks.length ? p.nextBacks.map(b => rowBack(b, "다음 날 토")).join("") : `<div class="empty">다음 날 선택한 위치로 오는 차가 없어요.</div>`;
+    if (!p.goes.length) backHtml = `<div class="empty">—</div>`;
+    return `<section class="resort${p.status[0]==="st-none"?" dim":""}">
+      <div class="rhead"><h2>${res}</h2><span class="status ${p.status[0]}">${p.status[1]}</span></div>
+      ${fareHtml(res)}
+      <div class="cols"><div class="col"><h3>가는 편</h3>${goHtml}</div><div class="col"><h3>오는 편</h3>${backHtml}</div></div>
+    </section>`;
+  }).join("");
+
+  document.querySelectorAll(".day").forEach(b => b.setAttribute("aria-pressed", b.dataset.k === k ? "true" : "false"));
+}
+
+function select(d, instant){
+  selected = d; render();
+  const el = document.querySelector(`.day[data-k="${key(d)}"]`);
+  if (el) el.scrollIntoView({inline:"center", block:"nearest", behavior: instant ? "auto" : "smooth"});
+}
+
+document.querySelectorAll(".chip").forEach(c => c.addEventListener("click", () => {
+  const v = c.dataset.back;
+  if (backFilter.has(v)) { if (backFilter.size > 1) backFilter.delete(v); } else backFilter.add(v);
+  document.querySelectorAll(".chip").forEach(x => x.setAttribute("aria-pressed", backFilter.has(x.dataset.back) ? "true" : "false"));
+  buildStrip(); render();
+}));
+
+buildStrip();
+let init;
+if (TODAY >= SEASON_START && TODAY <= END) init = countOK(TODAY) > 0 ? TODAY : (firstAvailable(TODAY) || TODAY);
+else if (TODAY < SEASON_START) init = firstAvailable(SEASON_START) || SEASON_START;
+else init = END;
+window.scrollTo(0,0);
+select(init, true);
+window.scrollTo(0,0);
+if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(()=>{});
+</script>
+</body>
+</html>
