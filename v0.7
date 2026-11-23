@@ -96,6 +96,16 @@ h1{font-size:26px;font-weight:800;margin:4px 0 6px;letter-spacing:-0.02em;line-h
 .empty{font-size:13px;color:var(--muted);padding:6px 0}
 .dim{opacity:.45}
 
+.fare{display:flex;align-items:center;justify-content:space-between;gap:12px;background:var(--surface);border-radius:12px;padding:12px 14px;margin-bottom:14px}
+.fare .prices{font-size:13px;color:var(--muted);line-height:1.6}
+.fare .prices b{color:var(--ink);font-size:15px;font-weight:800;margin-right:2px}
+.fare .sub2{font-size:12px;color:var(--muted)}
+.fare .member{font-size:12px;color:var(--point);font-weight:600}
+.book{flex:0 0 auto;background:var(--ink);color:var(--bg);text-decoration:none;font-size:13px;font-weight:700;padding:10px 14px;border-radius:10px;white-space:nowrap}
+.book:focus-visible{outline:2px solid var(--point);outline-offset:2px}
+.extra + .extra{margin-top:10px}
+.extra ul{margin:8px 0 0;padding-left:18px}
+.extra li{margin:2px 0}
 .extra{margin-top:12px;background:var(--surface);border-radius:16px;padding:20px;font-size:13px;color:var(--muted)}
 .extra h2{font-size:17px;color:var(--ink);margin:0 0 6px;font-weight:800}
 .extra p{margin:0}
@@ -126,12 +136,24 @@ h1{font-size:26px;font-weight:800;margin:4px 0 6px;letter-spacing:-0.02em;line-h
   <div id="resorts"></div>
 
   <div class="extra">
+    <h2>KD 교통시즌권</h2>
+    <p>알펜시아·모나용평·웰리힐리·하이원 셔틀을 횟수 제한 없이 탈 수 있는 기명식 이용권이에요.</p>
+    <ul>
+      <li>이용 기간: 스키장 정식 개장 주말 ~ 2027년 3월 1일 (임시 개장일 제외)</li>
+      <li>시즌권이 있어도 매번 사전 예약 필수. 예약 후 노쇼가 2회 이상이면 건당 2,000원 위약금</li>
+      <li>환불: 개장 전 전액, 개장 ~ 12/31은 이용 횟수만큼 공제, 1/1부터 환불 불가</li>
+      <li>개장 첫 1~2주와 설 연휴에는 단축 운행될 수 있어요</li>
+    </ul>
+  </div>
+
+  <div class="extra">
     <h2>지산 · 엘리시안강촌</h2>
     <p>X6+로 이용 가능하지만 각 리조트 자체 셔틀이라 이 시간표에 없어요. 26/27 노선이 공지되면 추가할 예정이에요.</p>
   </div>
 
   <div class="notes">
     <p>도착 시간은 원본 시간표에 없어서 거리 기준으로 추정한 값이에요. 주말 오후 귀가길은 정체로 1시간 이상 늦어질 수 있어요.</p>
+    <p>요금은 동계 시즌(11/28~) 대인 기준이에요. 왕복 요금은 5일 이내에 돌아올 때만 적용되고, 현장 구매는 빈자리가 있을 때만 탈 수 있어요.</p>
     <p>예약 인원이 없으면 운행하지 않아요. 공휴일 운행 여부는 예약할 때 확인하세요.</p>
     <p>휘닉스파크, 서현 탑승, 새벽 홍대 탑승 노선은 제외했어요.</p>
   </div>
@@ -142,7 +164,7 @@ const LOC = {
   songnae:"송내역 남광장 150m 직진, CU편의점 앞",
   bupyeong:"부평역 북광장 노벨약국 앞 (지하상가 11번 출구)",
   hongdae:"홍대입구역 8번출구 100m, 스타벅스 홍대공항철도역점 앞",
-  stadium:"잠실종합운동장 6번출구와 7번출구 사이"
+  stadium:"잠실종합운동장 6번출구 앞 횡단보도 근처 (위치 변경)"
 };
 const RESORTS = ["알펜시아","모나용평","웰리힐리","하이원"];
 // rules: [성수기, 비수기, 3/2이후] — daily | weekend | fri | none
@@ -201,6 +223,28 @@ function runs(svc, d){
 }
 const addDay = (d,n) => new Date(d.getFullYear(), d.getMonth(), d.getDate()+n);
 
+const FARE = {
+  "알펜시아": {url:"https://skibus.purplebus.co.kr/Ap/", one:20000, rt:36000, onsite:22000},
+  "모나용평": {url:"https://skibus.purplebus.co.kr/Yp/", one:20000, rt:36000, onsite:22000,
+              member:{label:"용평 할인쿠폰 회원", one:18000, rt:32000}},
+  "웰리힐리": {url:"https://skibus.purplebus.co.kr/Wh/", one:16000, rt:30000, onsite:18000,
+              note:"25/26 기준 요금이라 26/27에 바뀔 수 있어요"},
+  "하이원":   {url:"https://skibus.purplebus.co.kr/Hi/", one:22000, rt:38000, onsite:25000,
+              note:"밸리콘도에서만 승하차. 돌아올 때 타는 곳은 콘도 입구 삼거리 대형버스 주차장(내린 곳과 달라요)"}
+};
+const won = n => n.toLocaleString("ko-KR") + "원";
+function fareHtml(res){
+  const f = FARE[res];
+  let body;
+  if (f.one){
+    body = `<div class="prices">편도 <b class="num">${won(f.one)}</b> · 왕복 <b class="num">${won(f.rt)}</b></div>
+      <div class="sub2">현장 구매 편도 ${won(f.onsite)}${f.note ? ` · ${f.note}` : ""}</div>
+      ${f.member ? `<div class="member">${f.member.label}: 편도 ${won(f.member.one)} · 왕복 ${won(f.member.rt)}</div>` : ""}`;
+  } else {
+    body = `<div class="sub2">${f.note}</div>`;
+  }
+  return `<div class="fare"><div>${body}</div><a class="book" href="${f.url}" target="_blank" rel="noopener">예매하기 ›</a></div>`;
+}
 let backFilter = new Set(["songnae","hongdae"]);
 let selected;
 const TODAY = (() => { const t = new Date(); return new Date(t.getFullYear(), t.getMonth(), t.getDate()); })();
@@ -289,6 +333,7 @@ function render(){
     if (!p.goes.length) backHtml = `<div class="empty">—</div>`;
     return `<section class="resort${p.status[0]==="st-none"?" dim":""}">
       <div class="rhead"><h2>${res}</h2><span class="status ${p.status[0]}">${p.status[1]}</span></div>
+      ${fareHtml(res)}
       <div class="cols"><div class="col"><h3>가는 편</h3>${goHtml}</div><div class="col"><h3>오는 편</h3>${backHtml}</div></div>
     </section>`;
   }).join("");
